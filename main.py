@@ -38,10 +38,7 @@ class TodoApp:
         # Initialize Database
         database.db_init()
         
-        # Setup File Picker and Date Picker
-        self.file_picker = ft.FilePicker()
-        self.page.overlay.append(self.file_picker)
-        
+        # Setup Date Picker
         self.date_picker = ft.DatePicker(on_change=self.on_date_picker_result)
         self.page.overlay.append(self.date_picker)
         
@@ -120,7 +117,7 @@ class TodoApp:
         
         # Action Buttons
         btn_new_task = ft.Container(
-            content=ft.ElevatedButton(
+            content=ft.Button(
                 content=ft.Row(
                     controls=[
                         ft.Icon(ft.Icons.ADD, size=18, color=ft.Colors.WHITE),
@@ -176,7 +173,7 @@ class TodoApp:
             content=sidebar_content,
             width=260,
             bgcolor=self.style_config["bg_color"],
-            border=ft.border.only(right=ft.BorderSide(1, self.style_config["card_bg_color"])),
+            border=ft.Border.only(right=ft.BorderSide(1, self.style_config["card_bg_color"])),
             padding=20
         )
 
@@ -202,7 +199,7 @@ class TodoApp:
                     content=ft.Row(
                         controls=[
                             ft.Text("Tag", size=11, color=ft.Colors.WHITE),
-                            ft.IconButton(ft.Icons.CLOSE, size=12, icon_color=ft.Colors.WHITE, on_click=self.clear_tag_filter, padding=0)
+                            ft.IconButton(ft.Icons.CLOSE, icon_color=ft.Colors.WHITE, on_click=self.clear_tag_filter, padding=0)
                         ]
                     ),
                     bgcolor=self.style_config["primary_color"],
@@ -240,7 +237,7 @@ class TodoApp:
             content=list_content,
             width=360,
             bgcolor=self.style_config["bg_color"],
-            border=ft.border.only(right=ft.BorderSide(1, self.style_config["card_bg_color"])),
+            border=ft.Border.only(right=ft.BorderSide(1, self.style_config["card_bg_color"])),
             padding=15
         )
 
@@ -250,7 +247,7 @@ class TodoApp:
             expand=True,
             bgcolor=self.style_config["card_bg_color"],
             padding=20,
-            border_radius=ft.border_radius.only(top_left=12, bottom_left=12)
+            border_radius=ft.BorderRadius.only(top_left=12, bottom_left=12)
         )
         return self.detail_container
 
@@ -283,7 +280,7 @@ class TodoApp:
             content=ft.Row(
                 controls=[
                     ft.Icon(icon, color=text_color, size=16),
-                    ft.Text(text, color=text_color, size=13, weight=ft.FontWeight.SEMI_BOLD)
+                    ft.Text(text, color=text_color, size=13, weight=ft.FontWeight.W_600)
                 ],
                 spacing=8
             ),
@@ -377,7 +374,7 @@ class TodoApp:
             
             self.tag_list.controls.append(
                 ft.Container(
-                    content=ft.Text(f"# {tag}", size=12, color=fg, weight=ft.FontWeight.SEMI_BOLD),
+                    content=ft.Text(f"# {tag}", size=12, color=fg, weight=ft.FontWeight.W_600),
                     bgcolor=bg,
                     padding=ft.Padding.symmetric(horizontal=10, vertical=6),
                     border_radius=6,
@@ -428,7 +425,7 @@ class TodoApp:
                 self.cards_list.controls.append(
                     ft.Container(
                         content=ft.Text("No tasks found", color=self.style_config["text_muted"]),
-                        alignment=ft.alignment.center,
+                        alignment=ft.Alignment.CENTER,
                         padding=40
                     )
                 )
@@ -728,13 +725,15 @@ class TodoApp:
             content=ft.Markdown(
                 value=task.main_text or "*No details or notes provided.*",
                 selectable=True,
-                extension_set=ft.MarkdownExtensionSet.GIT_HUB_WEB,
-                **md_styled_map
+                extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+                #**md_styled_map
+                md_style_sheet=ft.MarkdownStyleSheet(**md_styled_map),
+                width=float("inf")
             ),
             bgcolor=self.style_config["bg_color"],
             padding=15,
             border_radius=8,
-            border=ft.border.all(1, self.style_config["card_bg_color"])
+            border=ft.Border.all(1, self.style_config["card_bg_color"])
         )
         
         # Render dynamic style reload option
@@ -810,11 +809,11 @@ class TodoApp:
                         ft.Container(
                             content=ft.Column(
                                 controls=[
-                                    ft.Image(src=abs_path, height=120, fit=ft.ImageFit.CONTAIN, border_radius=6),
+                                    ft.Image(src=abs_path, height=120, fit=ft.BoxFit.CONTAIN, border_radius=6),
                                     ft.Text(filepath.split("_", 1)[-1], size=11, color=self.style_config["text_muted"], max_lines=1, overflow=ft.TextOverflow.ELLIPSIS)
                                 ]
                             ),
-                            border=ft.border.all(1, self.style_config["bg_color"]),
+                            border=ft.Border.all(1, self.style_config["bg_color"]),
                             border_radius=8,
                             padding=6
                         )
@@ -835,7 +834,7 @@ class TodoApp:
                                     )
                                 ]
                             ),
-                            border=ft.border.all(1, self.style_config["bg_color"]),
+                            border=ft.Border.all(1, self.style_config["bg_color"]),
                             border_radius=8,
                             padding=10,
                             width=180
@@ -867,9 +866,13 @@ class TodoApp:
                             content=ft.Row(
                                 controls=[
                                     ft.IconButton(status_icon, icon_color=status_col, icon_size=18, on_click=lambda e, sid=sub.id, sval=(sub.status != "completed"): self.on_task_status_changed(sid, sval)),
-                                    ft.Text(sub.title, size=13, color=self.style_config["text_color"], weight=ft.FontWeight.SEMI_BOLD, decoration=ft.TextDecoration.LINE_THROUGH if sub.status == "completed" else ft.TextDecoration.NONE),
+                                    ft.Text(
+                                        spans=[
+                                            ft.TextSpan(text=sub.title, style=ft.TextStyle(size=13, color=self.style_config["text_color"], weight=ft.FontWeight.W_600, decoration=ft.TextDecoration.LINE_THROUGH if sub.status == "completed" else ft.TextDecoration.NONE)),
+                                        ],
+                                    ),
                                     ft.Text(f"(#{sub.id})", size=11, color=self.style_config["text_muted"]),
-                                    ft.Spacer(),
+                                    ##ft.Spacer(),
                                     ft.IconButton(ft.Icons.LINK_OFF, tooltip="Remove dependency link", icon_size=16, on_click=lambda e, sid=sub.id: self.on_remove_dependency(task.id, sid)),
                                     ft.IconButton(ft.Icons.ARROW_FORWARD_ROUNDED, tooltip="Jump to subtask", icon_size=16, on_click=lambda e, sid=sub.id: self.on_task_selected(sid))
                                 ]
@@ -892,7 +895,7 @@ class TodoApp:
                                     ft.Icon(ft.Icons.ARROW_UPWARD, size=14, color=self.style_config["primary_color"]),
                                     ft.Text(parent.title, size=13, color=self.style_config["text_color"]),
                                     ft.Text(f"(#{parent.id})", size=11, color=self.style_config["text_muted"]),
-                                    ft.Spacer(),
+                                    #ft.Spacer(),
                                     ft.IconButton(ft.Icons.ARROW_FORWARD_ROUNDED, tooltip="Jump to parent task", icon_size=16, on_click=lambda e, pid=parent.id: self.on_task_selected(pid))
                                 ]
                             ),
@@ -902,14 +905,14 @@ class TodoApp:
                         )
                     )
                     
-        btn_add_dependency = ft.ElevatedButton(
+        btn_add_dependency = ft.Button(
             "Link Existing Subtask",
             icon=ft.Icons.ADD_LINK,
             on_click=lambda e: self.show_link_subtask_dialog(task),
             style=ft.ButtonStyle(bgcolor=self.style_config["bg_color"])
         )
         
-        btn_create_and_link_subtask = ft.ElevatedButton(
+        btn_create_and_link_subtask = ft.Button(
             "Create New Subtask",
             icon=ft.Icons.PLAYLIST_ADD,
             on_click=lambda e: self.on_new_subtask_clicked(task.id),
@@ -946,7 +949,7 @@ class TodoApp:
                             controls=[
                                 ft.Icon(ft.Icons.BOOK_ROUNDED, size=14, color=self.style_config["primary_color"]),
                                 ft.Text(entry.title, size=13, color=self.style_config["text_color"]),
-                                ft.Spacer(),
+                                #ft.Spacer(),
                                 ft.IconButton(ft.Icons.LINK_OFF, tooltip="Unlink journal entry", icon_size=16, on_click=lambda e, jid=entry.id: self.on_unlink_journal(task.id, jid)),
                                 ft.IconButton(ft.Icons.ARROW_FORWARD_ROUNDED, tooltip="Jump to journal entry", icon_size=16, on_click=lambda e, jid=entry.id: self.on_jump_to_journal(jid))
                             ]
@@ -957,7 +960,7 @@ class TodoApp:
                     )
                 )
                 
-        btn_link_journal = ft.ElevatedButton(
+        btn_link_journal = ft.Button(
             "Link Journal Entry",
             icon=ft.Icons.LINK,
             on_click=lambda e: self.show_link_journal_dialog(task.id),
@@ -1043,13 +1046,15 @@ class TodoApp:
             content=ft.Markdown(
                 value=entry.main_text or "*No entry text.*",
                 selectable=True,
-                extension_set=ft.MarkdownExtensionSet.GIT_HUB_WEB,
-                **md_styled_map
+                extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+                #**md_styled_map
+                md_style_sheet=ft.MarkdownStyleSheet(**md_styled_map),
+                width=float("inf")
             ),
             bgcolor=self.style_config["bg_color"],
             padding=15,
             border_radius=8,
-            border=ft.border.all(1, self.style_config["card_bg_color"])
+            border=ft.Border.all(1, self.style_config["card_bg_color"])
         )
         
         # Attachments
@@ -1073,7 +1078,7 @@ class TodoApp:
                                     ft.Text(filepath.split("_", 1)[-1], size=11, color=self.style_config["text_muted"], max_lines=1, overflow=ft.TextOverflow.ELLIPSIS)
                                 ]
                             ),
-                            border=ft.border.all(1, self.style_config["bg_color"]),
+                            border=ft.Border.all(1, self.style_config["bg_color"]),
                             border_radius=8,
                             padding=6
                         )
@@ -1094,7 +1099,7 @@ class TodoApp:
                                     )
                                 ]
                             ),
-                            border=ft.border.all(1, self.style_config["bg_color"]),
+                            border=ft.Border.all(1, self.style_config["bg_color"]),
                             border_radius=8,
                             padding=10,
                             width=180
@@ -1122,7 +1127,7 @@ class TodoApp:
                             controls=[
                                 ft.Icon(ft.Icons.TASK_ALT_ROUNDED, size=14, color=self.style_config["primary_color"]),
                                 ft.Text(task.title, size=13, color=self.style_config["text_color"]),
-                                ft.Spacer(),
+                                #ft.Spacer(),
                                 ft.IconButton(ft.Icons.LINK_OFF, tooltip="Unlink task", icon_size=16, on_click=lambda e, tid=task.id: self.on_unlink_task(tid, entry.id)),
                                 ft.IconButton(ft.Icons.ARROW_FORWARD_ROUNDED, tooltip="Jump to task", icon_size=16, on_click=lambda e, tid=task.id: self.on_jump_to_task(tid))
                             ]
@@ -1133,7 +1138,7 @@ class TodoApp:
                     )
                 )
                 
-        btn_link_task = ft.ElevatedButton(
+        btn_link_task = ft.Button(
             "Link Task",
             icon=ft.Icons.LINK,
             on_click=lambda e: self.show_link_task_dialog(entry.id),
@@ -1178,7 +1183,7 @@ class TodoApp:
                     ft.Column(
                         controls=[
                             ft.Text(label, size=10, color=self.style_config["text_muted"], weight=ft.FontWeight.BOLD),
-                            ft.Text(value, size=12, color=self.style_config["text_color"], weight=ft.FontWeight.SEMI_BOLD, overflow=ft.TextOverflow.ELLIPSIS, max_lines=1)
+                            ft.Text(value, size=12, color=self.style_config["text_color"], weight=ft.FontWeight.W_600, overflow=ft.TextOverflow.ELLIPSIS, max_lines=1)
                         ],
                         spacing=0,
                         expand=True
@@ -1201,7 +1206,7 @@ class TodoApp:
         self.page.bgcolor = self.style_config.get("bg_color")
         self.show_details()
         self.page.update()
-        ft.SnackBar(content=ft.Text("Stylesheet reloaded!")).show_snack_bar(self.page)
+        self.page.show_dialog(ft.SnackBar(content=ft.Text("Stylesheet reloaded!")))
 
     def on_remove_dependency(self, parent_id: int, sub_id: int):
         database.remove_dependency(parent_id, sub_id)
@@ -1255,24 +1260,25 @@ class TodoApp:
             if database.check_dependency_cycle(parent_id=task.id, subtask_id=t.id):
                 continue
             candidate_tasks.append(t)
+            print(candidate_tasks)
             
         if not candidate_tasks:
             self.show_alert("No eligible tasks available to link as subtasks without creating loops.")
             return
             
-        dropdown_options = [ft.dropdown.Option(key=str(t.id), text=f"{t.title} (#{t.id})") for t in candidate_tasks]
+        dropdown_options = [ft.DropdownOption(key=str(t.id), text=f"{t.title} (#{t.id})") for t in candidate_tasks]
         
         dd_tasks = ft.Dropdown(
             label="Select task to depend on",
             options=dropdown_options,
-            expand=True
+            width=600
         )
         
         def on_link(e):
             if dd_tasks.value:
                 sub_id = int(dd_tasks.value)
                 database.add_dependency(parent_id=task.id, subtask_id=sub_id)
-                self.page.dialog.open = False
+                self.page.pop_dialog()
                 self.show_details()
                 self.refresh_list()
                 self.page.update()
@@ -1282,13 +1288,13 @@ class TodoApp:
             content=ft.Row(controls=[dd_tasks]),
             actions=[
                 ft.TextButton("Cancel", on_click=lambda e: self.close_dialog()),
-                ft.ElevatedButton("Link Dependency", bgcolor=self.style_config["primary_color"], on_click=on_link)
+                ft.Button("Link Dependency", bgcolor=self.style_config["primary_color"], on_click=on_link)
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
         
-        self.page.dialog = dialog
-        dialog.open = True
+        #self.page.dialog = dialog
+        self.page.show_dialog(dialog)
         self.page.update()
 
     # Link Journal Dialog
@@ -1313,7 +1319,7 @@ class TodoApp:
             if dd_journals.value:
                 j_id = int(dd_journals.value)
                 database.link_task_journal(task_id, j_id)
-                self.page.dialog.open = False
+                self.page.pop_dialog()
                 self.show_details()
                 self.page.update()
                 
@@ -1322,12 +1328,12 @@ class TodoApp:
             content=ft.Row(controls=[dd_journals]),
             actions=[
                 ft.TextButton("Cancel", on_click=lambda e: self.close_dialog()),
-                ft.ElevatedButton("Link", bgcolor=self.style_config["primary_color"], on_click=on_link)
+                ft.Button("Link", bgcolor=self.style_config["primary_color"], on_click=on_link)
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
-        self.page.dialog = dialog
-        dialog.open = True
+        #self.page.dialog = dialog
+        self.page.show_dialog(dialog)
         self.page.update()
 
     # Link Task Dialog (from journal detail)
@@ -1351,7 +1357,7 @@ class TodoApp:
             if dd_tasks.value:
                 t_id = int(dd_tasks.value)
                 database.link_task_journal(t_id, journal_id)
-                self.page.dialog.open = False
+                self.page.pop_dialog()
                 self.show_details()
                 self.page.update()
                 
@@ -1360,16 +1366,16 @@ class TodoApp:
             content=ft.Row(controls=[dd_tasks]),
             actions=[
                 ft.TextButton("Cancel", on_click=lambda e: self.close_dialog()),
-                ft.ElevatedButton("Link", bgcolor=self.style_config["primary_color"], on_click=on_link)
+                ft.Button("Link", bgcolor=self.style_config["primary_color"], on_click=on_link)
             ],
             actions_alignment=ft.MainAxisAlignment.END
         )
-        self.page.dialog = dialog
-        dialog.open = True
+        #self.page.dialog = dialog
+        self.page.show_dialog(dialog)
         self.page.update()
 
     def close_dialog(self):
-        self.page.dialog.open = False
+        self.page.pop_dialog()
         self.page.update()
 
     def show_alert(self, message: str):
@@ -1378,8 +1384,8 @@ class TodoApp:
             content=ft.Text(message),
             actions=[ft.TextButton("OK", on_click=lambda e: self.close_dialog())]
         )
-        self.page.dialog = dialog
-        dialog.open = True
+        #self.page.dialog = dialog
+        self.page.show_dialog(dialog)
         self.page.update()
 
     # ==========================================
@@ -1398,7 +1404,7 @@ class TodoApp:
                 database.delete_journal_entry(self.selected_journal_id)
                 self.selected_journal_id = None
                 
-            self.page.dialog.open = False
+            self.page.pop_dialog()
             self.refresh_list()
             self.update_tag_cloud()
             self.show_details()
@@ -1409,11 +1415,11 @@ class TodoApp:
             content=ft.Text(body),
             actions=[
                 ft.TextButton("Cancel", on_click=lambda e: self.close_dialog()),
-                ft.ElevatedButton("Delete", bgcolor=ft.Colors.RED_500, color=ft.Colors.WHITE, on_click=perform_delete)
+                ft.Button("Delete", bgcolor=ft.Colors.RED_500, color=ft.Colors.WHITE, on_click=perform_delete)
             ]
         )
-        self.page.dialog = dialog
-        dialog.open = True
+        #self.page.dialog = dialog
+        self.page.show_dialog(dialog)
         self.page.update()
 
     # ==========================================
@@ -1491,7 +1497,8 @@ class TodoApp:
             min_lines=8,
             max_lines=15,
             border_radius=6,
-            bgcolor=self.style_config["bg_color"]
+            bgcolor=self.style_config["bg_color"],
+            width=float("inf")
         )
         
         self.edit_task_due = ft.TextField(
@@ -1542,7 +1549,7 @@ class TodoApp:
                 self.refresh_emails_builder_ui()
                 self.page.update()
                 
-        btn_add_email = ft.ElevatedButton("Add Email Info", icon=ft.Icons.ADD, on_click=add_email_to_temp, bgcolor=self.style_config["bg_color"])
+        btn_add_email = ft.Button("Add Email Info", icon=ft.Icons.ADD, on_click=add_email_to_temp, bgcolor=self.style_config["bg_color"])
         
         email_entry_row = ft.Row(
             controls=[
@@ -1558,7 +1565,7 @@ class TodoApp:
         self.attachments_builder_container = ft.Column(spacing=5)
         self.refresh_attachments_builder_ui()
         
-        btn_add_attachment = ft.ElevatedButton(
+        btn_add_attachment = ft.Button(
             "Select Attachment File",
             icon=ft.Icons.ATTACHMENT,
             on_click=self.pick_files_clicked,
@@ -1566,7 +1573,7 @@ class TodoApp:
         )
         
         # Form buttons
-        btn_save = ft.ElevatedButton("Save Task", icon=ft.Icons.SAVE, bgcolor=self.style_config["primary_color"], color=ft.Colors.WHITE, on_click=self.on_save_task_clicked, height=45)
+        btn_save = ft.Button("Save Task", icon=ft.Icons.SAVE, bgcolor=self.style_config["primary_color"], color=ft.Colors.WHITE, on_click=self.on_save_task_clicked, height=45)
         btn_cancel = ft.OutlinedButton("Cancel", on_click=self.on_cancel_edit_clicked, height=45)
         
         form_scroll = ft.Column(
@@ -1612,14 +1619,15 @@ class TodoApp:
             min_lines=12,
             max_lines=20,
             border_radius=6,
-            bgcolor=self.style_config["bg_color"]
+            bgcolor=self.style_config["bg_color"],
+            width=float("inf")
         )
         
         # Attachments
         self.attachments_builder_container = ft.Column(spacing=5)
         self.refresh_attachments_builder_ui()
         
-        btn_add_attachment = ft.ElevatedButton(
+        btn_add_attachment = ft.Button(
             "Select Attached File / Content",
             icon=ft.Icons.ATTACHMENT,
             on_click=self.pick_files_clicked,
@@ -1627,7 +1635,7 @@ class TodoApp:
         )
         
         # Form buttons
-        btn_save = ft.ElevatedButton("Save Journal", icon=ft.Icons.SAVE, bgcolor=self.style_config["primary_color"], color=ft.Colors.WHITE, on_click=self.on_save_journal_clicked, height=45)
+        btn_save = ft.Button("Save Journal", icon=ft.Icons.SAVE, bgcolor=self.style_config["primary_color"], color=ft.Colors.WHITE, on_click=self.on_save_journal_clicked, height=45)
         btn_cancel = ft.OutlinedButton("Cancel", on_click=self.on_cancel_edit_clicked, height=45)
         
         form_scroll = ft.Column(
@@ -1721,7 +1729,7 @@ class TodoApp:
             self.page.update()
 
     async def pick_files_clicked(self, e):
-        files = await self.file_picker.pick_files(allow_multiple=False)
+        files = await ft.FilePicker().pick_files(allow_multiple=True)
         if files:
             file_path = files[0].path
             if file_path:
@@ -1831,4 +1839,4 @@ def main(page: ft.Page):
     TodoApp(page)
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)

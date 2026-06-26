@@ -94,10 +94,10 @@ def get_markdown_styles(config: dict) -> dict:
     )
     
     return {
-        "body_style": body_style,
-        "heading_1_style": h1_style,
-        "heading_2_style": h2_style,
-        "heading_3_style": h3_style,
-        "link_style": link_style,
-        "code_style": code_style
+        #"body_style": body_style,
+        "h1_text_style": h1_style,
+        "h2_text_style": h2_style,
+        "h3_text_style": h3_style,
+        "a_text_style": link_style,
+        "code_text_style": code_style
     }
