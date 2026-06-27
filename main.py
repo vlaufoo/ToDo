@@ -26,6 +26,7 @@ class TodoApp:
         self.search_query = ""
         self.tag_filter = None
         self.status_filter = "pending"  # "pending", "completed", "all"
+        self.available_views = ["tasks", "journal"]
         
         # Edit/Create State
         self.is_editing = False
@@ -41,6 +42,8 @@ class TodoApp:
         # Setup Date Picker
         self.date_picker = ft.DatePicker(on_change=self.on_date_picker_result)
         self.page.overlay.append(self.date_picker)
+
+        self.page.on_keyboard_event = self.global_key_handler
         
         # Build UI layout
         self.build_ui()
@@ -65,8 +68,10 @@ class TodoApp:
             expand=True,
             spacing=0
         )
-        
+
         self.page.add(self.main_layout)
+
+
 
     # ==========================================
     # UI Component Creators
@@ -303,6 +308,48 @@ class TodoApp:
     # ==========================================
     # State updates and events
     # ==========================================
+    def global_key_handler(self, e: ft.KeyboardEvent):
+        
+        if not self.is_editing:
+            if e.ctrl and e.key.lower() == "tab":
+                current_index = self.available_views.index(self.selected_view)
+                next_index = (current_index + 1) % len(self.available_views)
+                new_view = self.available_views[next_index]
+                self.on_nav_clicked(view_name=new_view)
+            elif e.ctrl and e.key.lower() == "n":
+                if self.selected_view == "tasks":
+                    self.on_new_task_clicked()
+                elif self.selected_view == "journal":
+                    self.on_new_journal_clicked()
+                    
+
+        elif self.is_editing:
+            if self.selected_view == "tasks":
+                if e.ctrl and e.key.lower() == "s":
+                    self.on_save_task_clicked()
+                elif e.key.lower() == "escape":
+                    self.on_cancel_edit_clicked()
+
+
+        ## Action behavior depending on current route
+        #if self.selected_view == "tasks":
+        #        # Actions while browsing the list
+        #    if e.key.lower() == "n":
+        #            page.route = "/add"
+        #            render_view()
+        #        elif e.key.lower() == "q":
+        #            page.window_close()
+        #            
+        #    elif self.slected_view = "journal":
+        #        # Actions while typing / interacting with add form
+        #        if e.key == "Enter":
+        #            # Execute the save action we bound to page data
+        #            if "save_action" in page.data:
+        #                page.data["save_action"]()
+        #        elif e.key == "Escape":
+        #            page.route = "/"
+        #            render_view()
+    
 
     def on_nav_clicked(self, view_name: str):
         self.selected_view = view_name
@@ -443,7 +490,7 @@ class TodoApp:
                 self.cards_list.controls.append(
                     ft.Container(
                         content=ft.Text("No journal entries found", color=self.style_config["text_muted"]),
-                        alignment=ft.alignment.center,
+                        alignment=ft.Alignment.CENTER,
                         padding=40
                     )
                 )
@@ -462,7 +509,7 @@ class TodoApp:
                 ft.ControlState.SELECTED: self.style_config["primary_color"],
                 ft.ControlState.DEFAULT: self.style_config["text_muted"]
             },
-            on_change=lambda e, t_id=task.id: self.on_task_status_changed(t_id, e.value)
+            on_change=lambda e, t_id=task.id, completion=not (task.status == "completed"): self.on_task_status_changed(t_id, completion)
         )
         
         # Task due date indicator
@@ -1426,7 +1473,7 @@ class TodoApp:
     # Creating / Editing View Renderers
     # ==========================================
     
-    def on_new_task_clicked(self, e):
+    def on_new_task_clicked(self, e=None):
         self.is_editing = True
         self.editing_item_type = "task"
         self.selected_task_id = None
@@ -1447,7 +1494,7 @@ class TodoApp:
         self.render_edit_view()
         self.page.update()
 
-    def on_new_journal_clicked(self, e):
+    def on_new_journal_clicked(self, e=None):
         self.is_editing = True
         self.editing_item_type = "journal"
         self.selected_journal_id = None
@@ -1746,7 +1793,7 @@ class TodoApp:
     # Saving Forms
     # ==========================================
     
-    def on_save_task_clicked(self, e):
+    def on_save_task_clicked(self, e=None):
         if not self.edit_task_title.value:
             self.show_alert("Title is required.")
             return
@@ -1829,7 +1876,7 @@ class TodoApp:
         self.show_details()
         self.page.update()
 
-    def on_cancel_edit_clicked(self, e):
+    def on_cancel_edit_clicked(self, e=None):
         self.is_editing = False
         self.parent_to_link_after_creation = None
         self.show_details()
