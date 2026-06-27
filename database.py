@@ -540,3 +540,32 @@ def get_tasks_for_journal_entry(journal_id: int) -> List[Task]:
         if task_obj:
             tasks.append(task_obj)
     return tasks
+
+
+def get_tasks_for_month(year: int, month: int):
+    # Format month to be zero-padded (e.g., 6 becomes "06") to match SQLite patterns
+    month_str = f"{month:02d}"
+    year_str = str(year)
+    
+    # Connect to your SQLite database file
+    conn = sqlite3.connect("your_database_name.db") # Replace with your actual DB path
+    conn.row_factory = sqlite3.Row  # This allows accessing columns by name like a dict
+    cursor = conn.cursor()
+    
+    # Query filters where due_date is not null, matches the year, and matches the month
+    cursor.execute("""
+        SELECT task_id FROM tasks 
+        WHERE due_date IS NOT NULL 
+          AND strftime('%Y', due_date) = ?
+          AND strftime('%m', due_date) = ?
+    """, (year_str, month_str))
+    
+    ids = cursor.fetchall()
+    conn.close()
+
+    tasks = []
+    for tid in ids:
+        task_obj = get_task(tid)
+        if task_obj:
+            tasks.append(task_obj)
+    return tasks

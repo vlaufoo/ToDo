@@ -158,6 +158,25 @@ class TodoApp:
             ),
             padding=ft.Padding.only(top=10)
         )
+
+        btn_calendar = ft.Container(
+            content=ft.OutlinedButton(
+                content=ft.Row(
+                    controls=[
+                        ft.Icon(ft.Icons.CALENDAR_MONTH, size=18, color=self.style_config["primary_color"]),
+                        ft.Text("Calendar View", weight=ft.FontWeight.BOLD, color=self.style_config["primary_color"])
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER
+                ),
+                style=ft.ButtonStyle(
+                    side=ft.BorderSide(color=self.style_config["primary_color"]),
+                    shape=ft.RoundedRectangleBorder(radius=8),
+                ),
+                on_click=self.on_new_journal_clicked,
+                height=45
+            ),
+            padding=ft.Padding.only(top=10)
+        )
         
         # Sidebar Assembly
         sidebar_content = ft.Column(
@@ -168,7 +187,8 @@ class TodoApp:
                 self.nav_journal,
                 btn_new_task,
                 btn_new_journal,
-                tag_section
+                tag_section,
+                btn_calendar
             ],
             scroll=ft.ScrollMode.AUTO,
             expand=True
@@ -477,6 +497,10 @@ class TodoApp:
                     )
                 )
             else:
+                # Sorts the list in-place
+                tasks_list.sort(
+                    key=lambda task: (task.due_date is None, task.due_date)
+                )
                 for task in tasks_list:
                     self.cards_list.controls.append(self.create_task_card(task))
         else:
