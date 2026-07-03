@@ -1,4 +1,5 @@
 import os
+import sys
 import sqlite3
 import json
 import uuid
@@ -11,11 +12,27 @@ DB_NAME = "todo.db"
 APP_NAME = "MyToDo"
 
 def get_app_dir() -> str:
-    """Gets the system-appropriate application directory and creates it."""
-    app_dir = user_data_dir(APP_NAME, appauthor=False)
-    os.makedirs(app_dir, exist_ok=True)
-    return app_dir
+    """Gets the application directory from CLI arguments,
 
+    falling back to the executable's actual location or the system default.
+    """
+    # 1. Check if an argument was explicitly passed
+    if len(sys.argv) > 1:
+        app_dir = os.path.abspath(sys.argv[1])
+    else:
+        # 2. Handle bundled executables (Flet/PyInstaller)
+        if getattr(sys, 'frozen', False):
+            # sys.executable gives the actual path of the .exe file launched by the user
+            app_dir = os.path.dirname(os.path.realpath(sys.executable))
+        else:
+            # Fallback for un-compiled script runs (e.g., flet run, python main.py)
+            app_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+
+    # 3. Create the directory if it doesn't exist
+    os.makedirs(app_dir, exist_ok=True)
+    
+    return app_dir
+    
 def get_db_path() -> str:
     """Gets the database file path."""
     return os.path.join(get_app_dir(), DB_NAME)
